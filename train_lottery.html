@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老司機，帶帶我</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .add-carriage-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .add-carriage-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .add-carriage-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .carriages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .carriage-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 25px;
+            border: 4px solid #764ba2;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .carriage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #764ba2;
+        }
+
+        .carriage-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .remove-carriage-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .remove-carriage-btn:hover {
+            background: #ff3838;
+            transform: scale(1.05);
+        }
+
+        .carriage-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .waiting-section, .seats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-passenger-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background 0.3s;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-passenger-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .add-passenger-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            transition: width 2s linear;
+        }
+
+        .add-passenger-btn.holding::before {
+            width: 100%;
+        }
+
+        .add-passenger-btn.guaranteed {
+            background: linear-gradient(135deg, #ff1744 0%, #ff5252 100%);
+            animation: guaranteedFlash 0.6s ease;
+            box-shadow: 0 0 30px rgba(255, 23, 68, 0.8), 
+                        0 0 60px rgba(255, 23, 68, 0.5);
+        }
+
+        @keyframes guaranteedFlash {
+            0%, 100% { 
+                transform: scale(1);
+            }
+            50% { 
+                transform: scale(1.1);
+            }
+        }
+
+        .waiting-list {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+            align-content: start;
+        }
+
+        .passenger-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.2s;
+            height: fit-content;
+        }
+
+        .passenger-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .passenger-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .remove-passenger-btn {
+            background: #ff6b81;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background 0.3s;
+        }
+
+        .remove-passenger-btn:hover {
+            background: #ff4757;
+        }
+
+        .lottery-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.15em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .lottery-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .lottery-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .seats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .seat {
+            aspect-ratio: 1;
+            background: #e9ecef;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #666;
+            border: 3px dashed #ccc;
+            transition: all 0.4s;
+            padding: 5px;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .seat.occupied {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 3px solid #764ba2;
+            animation: seatFill 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes seatFill {
+            0% {
+                transform: scale(0.5) rotate(-10deg);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.15) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .reset-btn {
+            width: 100%;
+            background: #ffa502;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #ff8c00;
+            transform: scale(1.02);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-size: 1em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .stat-item {
+            color: #666;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1024px) {
+            .carriage-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .seats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .seats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .waiting-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚄 老司機，帶帶我</h1>
+        
+        <div class="add-carriage-section">
+            <button class="add-carriage-btn" onclick="addCarriage()">➕ 新增車廂</button>
+        </div>
+
+        <div id="carriagesContainer" class="carriages-container"></div>
+    </div>
+
+    <script>
+        let carriages = [];
+        let carriageCounter = 0;
+        let pressTimers = {}; // 儲存每個車廂的長按計時器
+
+        // 新增車廂
+        function addCarriage() {
+            carriageCounter++;
+            carriages.push({
+                id: carriageCounter,
+                number: carriageCounter,
+                waitingList: [],
+                passengers: []
+            });
+            renderCarriages();
+        }
+
+        // 移除車廂
+        function removeCarriage(index) {
+            if (confirm('確定要移除這個車廂嗎？')) {
+                carriages.splice(index, 1);
+                renderCarriages();
+            }
+        }
+
+        // 處理按鈕按下（開始長按計時）
+        function handlePressStart(carriageIndex, event) {
+            event.preventDefault(); // 防止移動端的預設行為
+            
+            const carriage = carriages[carriageIndex];
+            // 計算待抽籤名單中的必中乘客數量
+            const guaranteedCount = carriage.waitingList.filter(p => p.guaranteed).length;
+            
+            // 如果必中乘客已達5人，則不允許長按
+            if (guaranteedCount >= 5) {
+                // 直接執行短按邏輯
+                addPassengerToCarriage(carriageIndex, false);
+                return;
+            }
+            
+            const btn = document.getElementById(`addBtn-${carriageIndex}`);
+            const timerId = `press-${carriageIndex}`;
+            
+            // 添加長按視覺效果
+            btn.classList.add('holding');
+            
+            // 設定2秒計時器
+            pressTimers[timerId] = setTimeout(() => {
+                // 長按2秒達成：新增必中乘客
+                btn.classList.remove('holding');
+                btn.classList.add('guaranteed');
+                
+                addPassengerToCarriage(carriageIndex, true);
+                
+                // 移除特效
+                setTimeout(() => {
+                    btn.classList.remove('guaranteed');
+                }, 600);
+                
+                delete pressTimers[timerId];
+            }, 2000);
+        }
+
+        // 處理按鈕放開（取消長按或執行短按）
+        function handlePressEnd(carriageIndex, event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById(`addBtn-${carriageIndex}`);
+            const timerId = `press-${carriageIndex}`;
+            
+            btn.classList.remove('holding');
+            
+            if (pressTimers[timerId]) {
+                // 未達2秒：視為短按，新增普通乘客
+                clearTimeout(pressTimers[timerId]);
+                delete pressTimers[timerId];
+                addPassengerToCarriage(carriageIndex, false);
+            }
+            // 如果已達2秒，計時器已經執行並刪除，不做任何事
+        }
+
+        // 處理滑鼠或手指移開按鈕（取消長按）
+        function handlePressCancel(carriageIndex) {
+            const btn = document.getElementById(`addBtn-${carriageIndex}`);
+            const timerId = `press-${carriageIndex}`;
+            
+            btn.classList.remove('holding');
+            
+            if (pressTimers[timerId]) {
+                clearTimeout(pressTimers[timerId]);
+                delete pressTimers[timerId];
+            }
+        }
+
+        // 新增乘客到車廂的待抽籤名單
+        function addPassengerToCarriage(carriageIndex, isGuaranteed = false) {
+            const input = document.getElementById(`passengerInput-${carriageIndex}`);
+            const name = input.value.trim();
+            
+            if (name === '') {
+                alert('請輸入乘客姓名！');
+                return;
+            }
+            
+            carriages[carriageIndex].waitingList.push({
+                name: name,
+                guaranteed: isGuaranteed
+            });
+            
+            input.value = '';
+            renderCarriages();
+        }
+
+        // 從待抽籤名單移除乘客
+        function removePassengerFromWaiting(carriageIndex, passengerIndex) {
+            carriages[carriageIndex].waitingList.splice(passengerIndex, 1);
+            renderCarriages();
+        }
+
+        // 開始抽籤（單一車廂）
+        function startLottery(carriageIndex) {
+            const carriage = carriages[carriageIndex];
+            
+            if (carriage.waitingList.length === 0) {
+                alert('這個車廂沒有待抽籤的乘客！');
+                return;
+            }
+            
+            const availableSeats = 5 - carriage.passengers.length;
+            
+            if (availableSeats === 0) {
+                alert('這個車廂已經滿座了！');
+                return;
+            }
+            
+            // 分離必中和普通乘客
+            const guaranteed = carriage.waitingList.filter(p => p.guaranteed);
+            const normal = carriage.waitingList.filter(p => !p.guaranteed);
+            
+            // 先確保必中乘客入座
+            let selected = [...guaranteed];
+            
+            // 計算剩餘座位
+            const remainingSeats = availableSeats - guaranteed.length;
+            
+            if (remainingSeats > 0 && normal.length > 0) {
+                // 對普通乘客進行洗牌
+                const shuffled = [...normal];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                
+                // 取出需要的普通乘客
+                selected.push(...shuffled.slice(0, remainingSeats));
+            }
+            
+            // 對最終的選中名單再次洗牌（讓必中乘客的位置也是隨機的）
+            for (let i = selected.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [selected[i], selected[j]] = [selected[j], selected[i]];
+            }
+            
+            // 加入車廂座位（只保存名字）
+            carriage.passengers.push(...selected.map(p => p.name));
+            
+            // 從待抽籤名單移除已抽中的人
+            const selectedNames = selected.map(p => p.name);
+            carriage.waitingList = carriage.waitingList.filter(
+                p => !selectedNames.includes(p.name)
+            );
+            
+            renderCarriages();
+        }
+
+        // 重置車廂（清空座位，保留待抽籤名單）
+        function resetCarriage(carriageIndex) {
+            const carriage = carriages[carriageIndex];
+            
+            if (carriage.passengers.length === 0) {
+                return;
+            }
+            
+            if (confirm('確定要清空這個車廂的座位嗎？乘客會回到待抽籤名單。')) {
+                // 將座位上的乘客放回待抽籤名單（設為普通乘客）
+                carriage.waitingList.push(...carriage.passengers.map(name => ({
+                    name: name,
+                    guaranteed: false
+                })));
+                carriage.passengers = [];
+                renderCarriages();
+            }
+        }
+
+        // 渲染所有車廂
+        function renderCarriages() {
+            const container = document.getElementById('carriagesContainer');
+            
+            if (carriages.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="background: white; padding: 60px; border-radius: 15px; font-size: 1.3em;">請點擊上方按鈕新增車廂</div>';
+                return;
+            }
+            
+            container.innerHTML = carriages.map((carriage, index) => `
+                <div class="carriage-card">
+                    <div class="carriage-header">
+                        <span class="carriage-title">🚃 車廂 ${carriage.number}</span>
+                        <button class="remove-carriage-btn" onclick="removeCarriage(${index})">🗑️ 移除車廂</button>
+                    </div>
+                    
+                    <div class="carriage-content">
+                        <!-- 左側：報名名單 -->
+                        <div class="waiting-section">
+                            <div class="section-title">📋 報名名單</div>
+                            
+                            <div class="input-group">
+                                <input 
+                                    type="text" 
+                                    id="passengerInput-${index}" 
+                                    placeholder="輸入乘客姓名..."
+                                    onkeypress="if(event.key==='Enter') addPassengerToCarriage(${index}, false)"
+                                />
+                                <button 
+                                    class="add-passenger-btn" 
+                                    id="addBtn-${index}"
+                                    onmousedown="handlePressStart(${index}, event)"
+                                    onmouseup="handlePressEnd(${index}, event)"
+                                    onmouseleave="handlePressCancel(${index})"
+                                    ontouchstart="handlePressStart(${index}, event)"
+                                    ontouchend="handlePressEnd(${index}, event)"
+                                    ontouchcancel="handlePressCancel(${index})"
+                                >
+                                    ➕ 新增
+                                </button>
+                            </div>
+                            
+                            <div class="waiting-list">
+                                ${carriage.waitingList.length === 0 
+                                    ? '<div class="empty-state">尚無報名乘客</div>'
+                                    : carriage.waitingList.map((passenger, pIndex) => `
+                                        <div class="passenger-item">
+                                            <span class="passenger-name">${passenger.name}</span>
+                                            <button class="remove-passenger-btn" onclick="removePassengerFromWaiting(${index}, ${pIndex})">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+                            
+                            <button 
+                                class="lottery-btn" 
+                                onclick="startLottery(${index})"
+                                ${carriage.waitingList.length === 0 || carriage.passengers.length >= 5 ? 'disabled' : ''}
+                            >
+                                🎲 開始抽籤
+                            </button>
+                            
+                            <div class="stats">
+                                <span class="stat-item">待抽: ${carriage.waitingList.length} 人</span>
+                                <span class="stat-item">剩餘座位: ${5 - carriage.passengers.length}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 右側：座位區 -->
+                        <div class="seats-section">
+                            <div class="section-title">💺 乘客座位 (${carriage.passengers.length}/5)</div>
+                            
+                            <div class="seats-grid">
+                                ${Array(5).fill(0).map((_, seatIndex) => {
+                                    const passenger = carriage.passengers[seatIndex];
+                                    return `
+                                        <div class="seat ${passenger ? 'occupied' : ''}">
+                                            ${passenger || `${seatIndex + 1}`}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            
+                            <button 
+                                class="reset-btn" 
+                                onclick="resetCarriage(${index})"
+                                ${carriage.passengers.length === 0 ? 'disabled' : ''}
+                            >
+                                🔄 重置座位
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 初始化：新增一個預設車廂
+        addCarriage();
+    </script>
+</body>
+</html>
